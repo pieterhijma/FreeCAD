@@ -38,7 +38,7 @@
 #endif
 
 #include <Base/Exception.h>
-
+#include <Base/Console.h>
 #include "ProjectionAlgos.h"
 #include "DrawingExport.h"
 
