@@ -37,6 +37,17 @@ SET(ProjectionAlgos_SRCS
 SOURCE_GROUP("Mod" FILES ${Projection_SRCS})
 SOURCE_GROUP("Algorithms" FILES ${ProjectionAlgos_SRCS})
 
+SET(ProjectionComplete_SRCS
+    ${Projection_SRCS}
+    ${ProjectionAlgos_SRCS}
+)
+
+if(FREECAD_USE_PCH)
+    add_definitions(-D_PreComp_)
+    GET_MSVC_PRECOMPILED_SOURCE("PreCompiled.cpp" PCH_SRCS ${ProjectionComplete_SRCS})
+    ADD_MSVC_PRECOMPILED_HEADER(Projection PreCompiled.h PreCompiled.cpp PCH_SRCS)
+endif(FREECAD_USE_PCH)
+
 add_library(Projection SHARED ${Projection_SRCS} ${ProjectionAlgos_SRCS})
 target_link_libraries(Projection ${Projection_LIBS})
 
