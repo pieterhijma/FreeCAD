@@ -22,6 +22,10 @@ if(BUILD_FEM)
     add_subdirectory(Fem)
 endif(BUILD_FEM)
 
+if(BUILD_PROJECTION)
+  add_subdirectory(Projection)
+endif(BUILD_PROJECTION)
+
 if(BUILD_IDF)
   add_subdirectory(Idf)
 endif(BUILD_IDF)
