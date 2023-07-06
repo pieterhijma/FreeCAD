@@ -20,15 +20,14 @@
  *                                                                         *
  ***************************************************************************/
 
-
 #ifndef _ProjectionAlgos_h_
 #define _ProjectionAlgos_h_
 
-#include <HLRBRep_HLRToShape.hxx>
-#include <TopoDS_Shape.hxx>
-#include <Base/Vector3D.h>
 #include <string>
-#include <vector>
+#include <TopoDS_Shape.hxx>
+
+#include <Base/Vector3D.h>
+#include <Mod/Drawing/DrawingGlobal.h>
 
 
 class BRepAdaptor_Curve;
@@ -42,7 +41,7 @@ class DrawingExport ProjectionAlgos
 {
 public:
     /// Constructor
-ProjectionAlgos(const std::vector<TopoDS_Shape> &Inputs, const Base::Vector3d &Origin, const Base::Vector3d &Dir, const Base::Vector3d &xDir);
+    ProjectionAlgos(const std::vector<TopoDS_Shape> &Inputs, const Base::Vector3d &Origin, const Base::Vector3d &Dir, const Base::Vector3d &xDir);
     virtual ~ProjectionAlgos();
 
     void execute(void);
@@ -52,7 +51,7 @@ ProjectionAlgos(const std::vector<TopoDS_Shape> &Inputs, const Base::Vector3d &O
         WithHidden = 1,
         WithSmooth = 2
     };
-    typedef std::map<std::string,std::string> XmlAttributes;
+    using XmlAttributes = std::map<std::string,std::string>;
 
     std::string getSVG(ExtractionType type, double tolerance=0.05,
                        XmlAttributes V_style=XmlAttributes(),
