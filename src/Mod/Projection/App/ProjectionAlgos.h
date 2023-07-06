@@ -25,6 +25,7 @@
 
 #include <string>
 #include <TopoDS_Shape.hxx>
+#include <HLRBRep_HLRToShape.hxx>
 
 #include <Base/Vector3D.h>
 #include <Mod/Drawing/DrawingGlobal.h>
