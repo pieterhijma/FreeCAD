@@ -10,13 +10,20 @@
  ***************************************************************************/
 
 #include "PreCompiled.h"
-#ifndef _PreComp_
-# include <Python.h>
-#endif
 
 #include <Base/Console.h>
-#include <Base/PyObjectBase.h>
 #include <Base/Interpreter.h>
+#include <Base/PyObjectBase.h>
+
+#include "FeatureClip.h"
+#include "FeaturePage.h"
+#include "FeatureProjection.h"
+#include "FeatureView.h"
+#include "FeatureViewAnnotation.h"
+#include "FeatureViewPart.h"
+#include "FeatureViewSpreadsheet.h"
+#include "FeatureViewSymbol.h"
+#include "PageGroup.h"
 
 namespace Projection {
 extern PyObject* initModule();
@@ -32,7 +39,7 @@ PyMOD_INIT_FUNC(Projection)
     }
     catch(const Base::Exception& e) {
         PyErr_SetString(PyExc_ImportError, e.what());
-        PyMOD_Return(0);
+        PyMOD_Return(nullptr);
     }
     PyObject* mod = Projection::initModule();
     Base::Console().Log("Loading Projection module... done\n");
