@@ -20,22 +20,19 @@
  *                                                                         *
  ***************************************************************************/
 
-
 #include "PreCompiled.h"
 #ifndef _PreComp_
-# include <Python.h>
+# include <boost/regex.hpp>
 #endif
 
-#include <CXX/Extensions.hxx>
-#include <CXX/Objects.hxx>
-
-#include <Mod/Part/App/TopoShapePy.h>
-#include "ProjectionAlgos.h"
 #include <Base/Console.h>
+#include <Base/Interpreter.h>
 #include <Base/VectorPy.h>
-#include <boost/regex.hpp>
-
 #include <Mod/Part/App/OCCError.h>
+#include <Mod/Part/App/TopoShapePy.h>
+
+#include "ProjectionAlgos.h"
+
 
 using namespace std;
 using Part::TopoShapePy;
@@ -61,7 +58,7 @@ namespace Projection {
     string key;
     string value;
 
-    for (auto keyPy : sourceRange.keys()) {
+    for (const auto& keyPy : sourceRange.keys()) {
       key = Py::String(keyPy);
       value = Py::String(sourceRange[keyPy]);
       *targetIt = {key, value};
@@ -79,7 +76,7 @@ public:
             "string = projectToSVG2(TopoShapes[, App.Vector origin, App.Vector direction, string type, float tolerance, list of dict vStyles, list of dict v0Style, dict v1Style, dict hStyle, dict h0Style, dict h1Style])\n"
             " -- Project a shape and return the SVG representation as string."
         );
-        initialize("This module is the Drawing module."); // register with Python
+        initialize("This module is the Projection module."); // register with Python
     }
 
     virtual ~Module() {}
@@ -121,24 +118,24 @@ private:
     Py::Object projectToSVG2(const Py::Tuple& args, const Py::Dict& keys)
         {
 	  static char* argNames[] = {"topoShape", "origin", "direction", "xDirection", "type", "tolerance", "vStyles", "v0Styles", "v1Style", "hStyle", "h0Style", "h1Style", NULL};
-            PyObject *pcObjShapes = 0;
-            PyObject *pcObjOrigin = 0;
-            PyObject *pcObjDir = 0;
-            PyObject *pcObjXDir = 0;
-            const char *extractionTypePy = 0;
+            PyObject *pcObjShapes = nullptr;
+            PyObject *pcObjOrigin = nullptr;
+            PyObject *pcObjDir = nullptr;
+            PyObject *pcObjXDir = nullptr;
+            const char *extractionTypePy = nullptr;
             ProjectionAlgos::ExtractionType extractionType = ProjectionAlgos::Plain;
             const float tol = 0.1f;
-            PyObject* vStylesPy = 0;
+            PyObject* vStylesPy = nullptr;
             vector<ProjectionAlgos::XmlAttributes> vStyles;
-            PyObject* v0StylesPy = 0;
+            PyObject* v0StylesPy = nullptr;
             vector<ProjectionAlgos::XmlAttributes> v0Styles;
-            PyObject* v1StylePy = 0;
+            PyObject* v1StylePy = nullptr;
             ProjectionAlgos::XmlAttributes v1Style;
-            PyObject* hStylePy = 0;
+            PyObject* hStylePy = nullptr;
             ProjectionAlgos::XmlAttributes hStyle;
-            PyObject* h0StylePy = 0;
+            PyObject* h0StylePy = nullptr;
             ProjectionAlgos::XmlAttributes h0Style;
-            PyObject* h1StylePy = 0;
+            PyObject* h1StylePy = nullptr;
             ProjectionAlgos::XmlAttributes h1Style;
         
             // Get the arguments
@@ -245,7 +242,7 @@ private:
 
 PyObject* initModule()
 {
-    return (new Module)->module().ptr();
+    return Base::Interpreter().addModule(new Module);
 }
 
 } // namespace Projection
