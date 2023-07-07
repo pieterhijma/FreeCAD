@@ -5,10 +5,6 @@ set(Projection_Scripts
     Init.py
 )
 
-if(BUILD_GUI)
-    list (APPEND Projection_Scripts InitGui.py)
-endif(BUILD_GUI)
-
 add_custom_target(ProjectionScripts ALL
     SOURCES ${Projection_Scripts}
 )
