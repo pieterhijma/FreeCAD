@@ -478,6 +478,7 @@ std::vector<App::DocumentObject*> DocumentObject::getInList(void) const
 
 const std::vector<App::DocumentObject*>& DocumentObject::getInList() const
 {
+    FC_MSG("DocumentObject::getInList()");
     return _inList;
 }
 
@@ -494,6 +495,7 @@ const std::vector<App::DocumentObject*>& DocumentObject::getInList() const
 
 std::vector<App::DocumentObject*> DocumentObject::getInListRecursive() const
 {
+    FC_MSG("DocumentObject::getInListRecursive()");
     std::set<App::DocumentObject*> inSet;
     std::vector<App::DocumentObject*> res;
     getInListEx(inSet, true, &res);
@@ -542,6 +544,7 @@ void DocumentObject::getInListEx(std::set<App::DocumentObject*>& inSet,
         }
     }
 #else  // USE_OLD_DAG
+    FC_MSG("DocumentObject::getInListEx(set, bool, vector)");
 
     if (!recursive) {
         inSet.insert(_inList.begin(), _inList.end());
@@ -571,6 +574,7 @@ void DocumentObject::getInListEx(std::set<App::DocumentObject*>& inSet,
 
 std::set<App::DocumentObject*> DocumentObject::getInListEx(bool recursive) const
 {
+    FC_MSG("DocumentObject::getInListEx(bool)");
     std::set<App::DocumentObject*> ret;
     getInListEx(ret, recursive);
     return ret;

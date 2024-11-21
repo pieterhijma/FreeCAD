@@ -706,8 +706,15 @@ void PropertyLink::resetLink()
     _pcLink = nullptr;
 }
 
-void PropertyLink::setValue(App::DocumentObject* lValue)
+static void printBackLink(App::DocumentObject* parent, App::DocumentObject* value, const char* nameProperty)
 {
+    FC_MSG("  " << value->getFullName() << ": add " << parent->getFullName() << " -> " << value->getFullName());
+    FC_MSG("    because of property " << parent->getFullName() << "." << nameProperty);
+}
+
+void PropertyLink::setValue(App::DocumentObject * lValue)
+{
+    FC_MSG("PropertyLink::setValue()");
     auto parent = dynamic_cast<App::DocumentObject*>(getContainer());
     if (!testFlag(LinkAllowExternal) && parent && lValue
         && parent->getDocument() != lValue->getDocument()) {
@@ -726,6 +733,7 @@ void PropertyLink::setValue(App::DocumentObject* lValue)
             }
             if (lValue) {
                 lValue->_addBackLink(parent);
+                printBackLink(parent, lValue, getName());
             }
         }
     }
@@ -940,8 +948,9 @@ void PropertyLinkList::setSize(int newSize, const_reference def)
 
 void PropertyLinkList::set1Value(int idx, DocumentObject* const& value)
 {
+    FC_MSG("PropertyLinkList::set1Value()");
     DocumentObject* obj = nullptr;
-    if (idx >= 0 && idx < (int)_lValueList.size()) {
+    if(idx >= 0 && idx < (int)_lValueList.size()) {
         obj = _lValueList[idx];
         if (obj == value) {
             return;
@@ -965,6 +974,7 @@ void PropertyLinkList::set1Value(int idx, DocumentObject* const& value)
             }
             if (value) {
                 value->_addBackLink(static_cast<DocumentObject*>(getContainer()));
+                printBackLink(parent, value, getName());
             }
         }
     }
@@ -975,6 +985,7 @@ void PropertyLinkList::set1Value(int idx, DocumentObject* const& value)
 
 void PropertyLinkList::setValues(const std::vector<DocumentObject*>& value)
 {
+    FC_MSG("PropertyLinkList::setValues()");
     if (value.size() == 1 && !value[0]) {
         // one null element means clear, as backward compatibility for old code
         setValues(std::vector<DocumentObject*>());
@@ -1006,6 +1017,7 @@ void PropertyLinkList::setValues(const std::vector<DocumentObject*>& value)
             for (auto* obj : value) {
                 if (obj) {
                     obj->_addBackLink(parent);
+                    printBackLink(parent, obj, getName());
                 }
             }
         }
@@ -1328,6 +1340,7 @@ void PropertyLinkSub::setValue(App::DocumentObject* lValue,
                                std::vector<std::string>&& subs,
                                std::vector<ShadowSub>&& shadows)
 {
+    FC_MSG("PropertyLinkSub::setValue()");
     auto parent = Base::freecad_dynamic_cast<App::DocumentObject>(getContainer());
     if (lValue) {
         if (!lValue->isAttachedToDocument()) {
@@ -1349,6 +1362,7 @@ void PropertyLinkSub::setValue(App::DocumentObject* lValue,
             }
             if (lValue) {
                 lValue->_addBackLink(parent);
+                printBackLink(parent, lValue, getName());
             }
         }
     }
@@ -2224,6 +2238,7 @@ int PropertyLinkSubList::getSize() const
 
 void PropertyLinkSubList::setValue(DocumentObject* lValue, const char* SubName)
 {
+    FC_MSG("PropertyLinkSubList::setValue()");
     auto parent = Base::freecad_dynamic_cast<App::DocumentObject>(getContainer());
     verifyObject(lValue, parent);
 
@@ -2240,6 +2255,7 @@ void PropertyLinkSubList::setValue(DocumentObject* lValue, const char* SubName)
             }
             if (lValue) {
                 lValue->_addBackLink(parent);
+                printBackLink(parent, lValue, getName());
             }
         }
     }
@@ -2265,6 +2281,7 @@ void PropertyLinkSubList::setValue(DocumentObject* lValue, const char* SubName)
 void PropertyLinkSubList::setValues(const std::vector<DocumentObject*>& lValue,
                                     const std::vector<const char*>& lSubNames)
 {
+    FC_MSG("PropertyLinkSubList::setValues()");
     auto parent = Base::freecad_dynamic_cast<App::DocumentObject>(getContainer());
     for (auto obj : lValue) {
         verifyObject(obj, parent);
@@ -2294,6 +2311,7 @@ void PropertyLinkSubList::setValues(const std::vector<DocumentObject*>& lValue,
             for (auto* obj : lValue) {
                 if (obj) {
                     obj->_addBackLink(parent);
+                    printBackLink(parent, obj, getName());
                 }
             }
         }
@@ -2328,6 +2346,7 @@ void PropertyLinkSubList::setValues(std::vector<DocumentObject*>&& lValue,
                                     std::vector<std::string>&& lSubNames,
                                     std::vector<ShadowSub>&& ShadowSubList)
 {
+    FC_MSG("PropertyLinkSubList::setValues");
     auto parent = Base::freecad_dynamic_cast<App::DocumentObject>(getContainer());
     for (auto obj : lValue) {
         verifyObject(obj, parent);
@@ -2356,6 +2375,7 @@ void PropertyLinkSubList::setValues(std::vector<DocumentObject*>&& lValue,
             for (auto* obj : lValue) {
                 if (obj) {
                     obj->_addBackLink(parent);
+                    printBackLink(parent, obj, getName());
                 }
             }
         }
@@ -2378,6 +2398,7 @@ void PropertyLinkSubList::setValues(std::vector<DocumentObject*>&& lValue,
 
 void PropertyLinkSubList::setValue(DocumentObject* lValue, const std::vector<std::string>& SubList)
 {
+    FC_MSG("PropertyLinkSubList::setValue()");
     auto parent = dynamic_cast<App::DocumentObject*>(getContainer());
     verifyObject(lValue, parent);
 
@@ -2399,6 +2420,7 @@ void PropertyLinkSubList::setValue(DocumentObject* lValue, const std::vector<std
             // document object to ensure that the backlink is only added once
             if (lValue) {
                 lValue->_addBackLink(parent);
+                printBackLink(parent, lValue, getName());
             }
         }
     }
@@ -2427,6 +2449,7 @@ void PropertyLinkSubList::addValue(App::DocumentObject* obj,
                                    const std::vector<std::string>& subs,
                                    bool reset)
 {
+    FC_MSG("PropertyLinkSubList::addValue()");
     auto parent = Base::freecad_dynamic_cast<App::DocumentObject>(getContainer());
     verifyObject(obj, parent);
 
@@ -2450,6 +2473,7 @@ void PropertyLinkSubList::addValue(App::DocumentObject* obj,
             // document object to ensure that the backlink is only added once
             if (obj) {
                 obj->_addBackLink(parent);
+                printBackLink(parent, obj, getName());
             }
         }
     }
@@ -3838,6 +3862,7 @@ void PropertyXLink::setValue(App::DocumentObject* lValue, const char* subname)
 
 void PropertyXLink::restoreLink(App::DocumentObject* lValue)
 {
+    FC_MSG("PropertyXLink::restoreLink()");
     assert(!_pcLink && lValue && docInfo);
 
     auto owner = dynamic_cast<DocumentObject*>(getContainer());
@@ -3852,6 +3877,7 @@ void PropertyXLink::restoreLink(App::DocumentObject* lValue)
 #ifndef USE_OLD_DAG
     if (!owner->testStatus(ObjectStatus::Destroy) && _pcScope != LinkScope::Hidden) {
         lValue->_addBackLink(owner);
+        printBackLink(owner, lValue, getName());
     }
 #endif
     _pcLink = lValue;
@@ -3869,6 +3895,7 @@ void PropertyXLink::setValue(App::DocumentObject* lValue,
                              std::vector<std::string>&& subs,
                              std::vector<ShadowSub>&& shadows)
 {
+    FC_MSG("PropertyXLink::setValue()");
     if (_pcLink == lValue && _SubList == subs) {
         return;
     }
@@ -3916,6 +3943,7 @@ void PropertyXLink::setValue(App::DocumentObject* lValue,
         }
         if (lValue) {
             lValue->_addBackLink(owner);
+            printBackLink(owner, lValue, getName());
         }
     }
 #endif
@@ -5892,6 +5920,7 @@ bool PropertyXLinkContainer::isLinkedToDocument(const App::Document& doc) const
 
 void PropertyXLinkContainer::updateDeps(std::map<DocumentObject*, bool>&& newDeps)
 {
+    FC_MSG("PropertyXLinkContainer::updateDeps()");
     auto owner = Base::freecad_dynamic_cast<App::DocumentObject>(getContainer());
     if (!owner || !owner->isAttachedToDocument()) {
         return;
@@ -5909,6 +5938,7 @@ void PropertyXLinkContainer::updateDeps(std::map<DocumentObject*, bool>&& newDep
                     }
                     else {
                         obj->_addBackLink(owner);
+                        printBackLink(owner, obj, getName());
                     }
                 }
                 _Deps.erase(it);
@@ -5924,6 +5954,7 @@ void PropertyXLinkContainer::updateDeps(std::map<DocumentObject*, bool>&& newDep
             }
             else if (!v.second) {
                 obj->_addBackLink(owner);
+                printBackLink(owner, obj, getName());
             }
 
             onAddDep(obj);
