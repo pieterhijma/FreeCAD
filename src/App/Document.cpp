@@ -2854,6 +2854,7 @@ int Document::recompute(const std::vector<App::DocumentObject*> &objs, bool forc
 #else
     auto topoSortedObjects = getDependencyList(objs.empty()?d->objectArray:objs,DepSort|options);
 #endif
+    FC_MSG("Document::recompute");
     for(auto obj : topoSortedObjects)
         obj->setStatus(ObjectStatus::PendingRecompute,true);
 
@@ -2869,6 +2870,7 @@ int Document::recompute(const std::vector<App::DocumentObject*> &objs, bool forc
     try {
         // maximum two passes to allow some form of dependency inversion
         for(int passes=0; passes<2 && idx<topoSortedObjects.size(); ++passes) {
+            FC_MSG("  pass " << passes);
             std::unique_ptr<Base::SequencerLauncher> seq;
             if(canAbort) {
                 seq = std::make_unique<Base::SequencerLauncher>("Recompute...", topoSortedObjects.size());
@@ -2876,15 +2878,18 @@ int Document::recompute(const std::vector<App::DocumentObject*> &objs, bool forc
             FC_LOG("Recompute pass " << passes);
             for (; idx < topoSortedObjects.size(); ++idx) {
                 auto obj = topoSortedObjects[idx];
+                FC_MSG("    looking at " << obj->getFullName());
                 if(!obj->isAttachedToDocument() || filter.find(obj)!=filter.end())
                     continue;
                 // ask the object if it should be recomputed
                 bool doRecompute = false;
                 if (obj->mustRecompute()) {
+                    FC_MSG("      needs to be recomputed");
                     doRecompute = true;
                     ++objectCount;
                     int res = _recomputeFeature(obj);
                     if(res) {
+                        FC_MSG("        something went wrong");
                         if(hasError)
                             *hasError = true;
                         if(res < 0) {
@@ -2900,7 +2905,9 @@ int Document::recompute(const std::vector<App::DocumentObject*> &objs, bool forc
                 }
                 if(obj->isTouched() || doRecompute) {
                     signalRecomputedObject(*obj);
+                    FC_MSG("      purge touched");
                     obj->purgeTouched();
+                    FC_MSG("      mark others to be touched");
                     // set all dependent object touched to force recompute
                     for (auto inObjIt : obj->getInList())
                         inObjIt->enforceRecompute();
@@ -2909,14 +2916,16 @@ int Document::recompute(const std::vector<App::DocumentObject*> &objs, bool forc
                     seq->next(true);
             }
             // check if all objects are recomputed but still thouched
+            FC_MSG("      checking for things that are touched");
             for (size_t i=0;i<topoSortedObjects.size();++i) {
                 auto obj = topoSortedObjects[i];
+                FC_MSG("        looking at " << obj->getFullName());
                 obj->setStatus(ObjectStatus::Recompute2,false);
                 if(!filter.count(obj) && obj->isTouched()) {
                     if(passes>0)
                         FC_ERR(obj->getFullName() << " still touched after recompute");
                     else{
-                        FC_LOG(obj->getFullName() << " still touched after recompute");
+                        FC_MSG("          " << obj->getFullName() << " still touched after recompute");
                         if(idx>=topoSortedObjects.size()) {
                             // let's start the next pass on the first touched object
                             idx = i;
@@ -3150,7 +3159,7 @@ const char * Document::getErrorDescription(const App::DocumentObject*Obj) const
 // call the recompute of the Feature and handle the exceptions and errors.
 int Document::_recomputeFeature(DocumentObject* Feat)
 {
-    FC_LOG("Recomputing " << Feat->getFullName());
+    FC_MSG("Recomputing " << Feat->getFullName());
 
     DocumentObjectExecReturn  *returnCode = nullptr;
     try {
