@@ -401,16 +401,21 @@ const char* DocumentObject::detachFromDocument()
 
 const std::vector<DocumentObject*>& DocumentObject::getOutList() const
 {
+    FC_MSG("DocumentObject::getOutList()");
     if (!_outListCached) {
         _outList.clear();
         getOutList(0, _outList);
         _outListCached = true;
+    }
+    else {
+        FC_MSG("  return the cached values");
     }
     return _outList;
 }
 
 std::vector<DocumentObject*> DocumentObject::getOutList(int options) const
 {
+    FC_MSG("DocumentObject::getOutList(int)");
     std::vector<DocumentObject*> res;
     getOutList(options, res);
     return res;
@@ -418,6 +423,8 @@ std::vector<DocumentObject*> DocumentObject::getOutList(int options) const
 
 void DocumentObject::getOutList(int options, std::vector<DocumentObject*>& res) const
 {
+    FC_MSG("DocumentObject::getOutList(int, std::vector&)");
+    FC_MSG("  " << getFullName() << ":");
     if (_outListCached && !options) {
         res.insert(res.end(), _outList.begin(), _outList.end());
         return;
@@ -426,14 +433,34 @@ void DocumentObject::getOutList(int options, std::vector<DocumentObject*>& res) 
     getPropertyList(props);
     bool noHidden = !!(options & OutListNoHidden);
     std::size_t size = res.size();
+    std::size_t size_before_prop = res.size();
     for (auto prop : props) {
         auto link = dynamic_cast<PropertyLinkBase*>(prop);
-        if (link) {
+        if(link) {
             link->getLinks(res, noHidden);
+            std::size_t size_after_prop = res.size();
+            if (size_after_prop > size_before_prop) {
+                FC_MSG("    because of property " << link->getName());
+                for (auto it = res.begin() + size_before_prop; it != res.end();) {
+                    auto obj = *it;
+                    FC_MSG("      " << obj->getFullName());
+                    ++it;
+                }
+                size_before_prop = size_after_prop;
+            }
         }
     }
     if (!(options & OutListNoExpression)) {
+        size_before_prop = res.size();
         ExpressionEngine.getLinks(res);
+        if (res.size() > size_before_prop) {
+            FC_MSG("    because of property ExpressionEngine");
+            for (auto it = res.begin() + size_before_prop; it != res.end();) {
+                auto obj = *it;
+                FC_MSG("      " << obj->getFullName());
+                ++it;
+            }
+        }
     }
 
     if (options & OutListNoXLinked) {
