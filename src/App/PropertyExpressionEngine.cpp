@@ -768,6 +768,7 @@ bool PropertyExpressionEngine::depsAreTouched() const
 
 std::string PropertyExpressionEngine::validateExpression(const ObjectIdentifier &path, std::shared_ptr<const Expression> expr) const
 {
+    FC_MSG("PropertyExpressionEngine::validateExpression");
     std::string error;
     ObjectIdentifier usePath(canonicalPath(path));
 
@@ -779,11 +780,18 @@ std::string PropertyExpressionEngine::validateExpression(const ObjectIdentifier 
 
     // Get document object
     DocumentObject * pathDocObj = usePath.getDocumentObject();
+    FC_MSG("  pathDocObj: " << pathDocObj->getFullName());
     assert(pathDocObj);
 
     auto inList = pathDocObj->getInListEx(true);
+    FC_MSG("    inlist: ");
+    for (auto o : inList) {
+        FC_MSG("      " << o->getFullName());
+    }
+    FC_MSG("    dependent of expression: ");
     for(auto &v : expr->getDepObjects()) {
         auto docObj = v.first;
+        FC_MSG("      " << docObj->getFullName());
         if(!v.second && inList.count(docObj)) {
             std::stringstream ss;
             ss << "cyclic reference to " << docObj->getFullName();
