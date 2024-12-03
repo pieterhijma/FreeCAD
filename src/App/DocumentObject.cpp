@@ -396,9 +396,9 @@ void DocumentObject::getOutList(int options, std::vector<DocumentObject*> &res) 
     FC_MSG("DocumentObject::getOutList(int, std::vector&)");
     FC_MSG("  " << getFullName() << ":");
     if(_outListCached && !options) {
-        res.insert(res.end(),_outList.begin(),_outList.end());
+        //res.insert(res.end(),_outList.begin(),_outList.end());
         FC_MSG("    returning the cached values");
-        return;
+        //return;
     }
     std::vector<Property*> props;
     getPropertyList(props);
