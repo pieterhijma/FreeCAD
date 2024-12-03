@@ -3085,6 +3085,11 @@ int Document::recompute(const std::vector<App::DocumentObject*>& objs,
                         bool* hasError,
                         int options)
 {
+    FC_MSG("Document::recompute");
+    FC_MSG("  objs:");
+    for(auto obj : objs) {
+        FC_MSG("    " << obj->getFullName());
+    }
     if (d->undoing || d->rollback) {
         if (FC_LOG_INSTANCE.isEnabled(FC_LOGLEVEL_LOG)) {
             FC_WARN("Ignore document recompute on undo/redo");
@@ -3142,9 +3147,10 @@ int Document::recompute(const std::vector<App::DocumentObject*>& objs,
     auto topoSortedObjects =
         getDependencyList(objs.empty() ? d->objectArray : objs, DepSort | options);
 #endif
-    FC_MSG("Document::recompute");
+    FC_MSG("  topoSortedObjects");
     for (auto obj : topoSortedObjects) {
         obj->setStatus(ObjectStatus::PendingRecompute, true);
+        FC_MSG("    " << obj->getFullName());
     }
 
     ParameterGrp::handle hGrp =
@@ -3197,12 +3203,12 @@ int Document::recompute(const std::vector<App::DocumentObject*>& objs,
                 }
                 if (obj->isTouched() || doRecompute) {
                     signalRecomputedObject(*obj);
-                    FC_MSG("      purge touched");
                     obj->purgeTouched();
-                    FC_MSG("      mark others to be touched");
                     // set all dependent object touched to force recompute
+                    FC_MSG("      marking the following objects to be touched:");
                     for (auto inObjIt : obj->getInList()) {
                         inObjIt->enforceRecompute();
+                        FC_MSG("      " << inObjIt->getFullName());
                     }
                 }
                 if (seq) {
