@@ -315,6 +315,7 @@ public:
      * @param recursive [in]: whether to obtain recursive in list
      */
     std::set<App::DocumentObject*> getInListEx(bool recursive) const;
+    std::set<App::DocumentObject*> getInListWithoutExposed() const;
 
     /// get group if object is part of a group, otherwise 0 is returned
     DocumentObjectGroup* getGroup() const;
@@ -776,6 +777,7 @@ protected:
 
 private:
     void printInvalidLinks() const;
+    bool onlyReferencedByExposedIn(const App::DocumentObject* obj) const;
 
     /// python object of this class and all descendent
 protected:  // attributes
