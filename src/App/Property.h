@@ -98,7 +98,8 @@ public:
         User1 = 28, // user-defined status
         User2 = 29, // user-defined status
         User3 = 30, // user-defined status
-        User4 = 31  // user-defined status
+        Exposed = 31,  // user-defined status
+
     };
 
     Property();
