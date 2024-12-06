@@ -2915,7 +2915,7 @@ int Document::recompute(const std::vector<App::DocumentObject*> &objs, bool forc
                     obj->purgeTouched();
                     // set all dependent object touched to force recompute
                     FC_MSG("      marking the following objects to be touched:");
-                    for (auto inObjIt : obj->getInList()) {
+                    for (auto inObjIt : obj->getInListWithoutExposed()) {
                         inObjIt->enforceRecompute();
                         FC_MSG("      " << inObjIt->getFullName());
                     }

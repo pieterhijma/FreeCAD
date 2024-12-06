@@ -46,6 +46,8 @@ TYPESYSTEM_SOURCE_ABSTRACT(App::PropertyExpressionContainer , App::PropertyXLink
 
 static std::set<PropertyExpressionContainer*> _ExprContainers;
 
+const bool EXCLUDE_EXPOSED = true;
+
 PropertyExpressionContainer::PropertyExpressionContainer() {
     static bool inited;
     if(!inited) {
@@ -789,10 +791,10 @@ std::string PropertyExpressionEngine::validateExpression(const ObjectIdentifier 
         FC_MSG("      " << o->getFullName());
     }
     FC_MSG("    dependent of expression: ");
-    for(auto &v : expr->getDepObjects()) {
+    for(auto &v : expr->getDepObjects(nullptr, EXCLUDE_EXPOSED)) {
         auto docObj = v.first;
         FC_MSG("      " << docObj->getFullName());
-        if(!v.second && inList.count(docObj)) {
+        if (!v.second && inList.count(docObj)) {
             std::stringstream ss;
             ss << "cyclic reference to " << docObj->getFullName();
             return ss.str();
