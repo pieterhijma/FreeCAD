@@ -813,6 +813,7 @@ enum MenuAction
     MA_EvalOnRestore,
     MA_CopyOnChange,
     MA_Copy,
+    MA_Exposed,
 };
 
 void PropertyEditor::setFirstLevelExpanded(bool doExpand)
@@ -1071,6 +1072,7 @@ void PropertyEditor::contextMenuEvent(QContextMenuEvent*)
         _ACTION_SETUP(Touched);
         _ACTION_SETUP(EvalOnRestore);
         _ACTION_SETUP(CopyOnChange);
+        _ACTION_SETUP(Exposed);
 
         menu.addMenu(subMenu);
     }
@@ -1126,6 +1128,7 @@ void PropertyEditor::contextMenuEvent(QContextMenuEvent*)
             ACTION_CHECK(Hidden);
             ACTION_CHECK(EvalOnRestore);
             ACTION_CHECK(CopyOnChange);
+            ACTION_CHECK(Exposed);
         case MA_Touched:
             for (auto prop : props) {
                 if (action->isChecked()) {

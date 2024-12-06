@@ -140,7 +140,7 @@ public:
         /// User defined status bit.
         User3 = 30,
         /// User defined status bit.
-        User4 = 31
+        Exposed = 31
     };
 
     /// Construct a property.
