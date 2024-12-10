@@ -45,6 +45,8 @@ TYPESYSTEM_SOURCE_ABSTRACT(App::PropertyExpressionContainer, App::PropertyXLinkC
 
 static std::set<PropertyExpressionContainer*> _ExprContainers;
 
+const bool EXCLUDE_EXPOSED = true;
+
 PropertyExpressionContainer::PropertyExpressionContainer()
 {
     static bool inited;
@@ -879,7 +881,7 @@ PropertyExpressionEngine::validateExpression(const ObjectIdentifier& path,
     assert(pathDocObj);
 
     auto inList = pathDocObj->getInListEx(true);
-    for (auto& v : expr->getDepObjects()) {
+    for(auto& v : expr->getDepObjects(nullptr, EXCLUDE_EXPOSED)) {
         auto docObj = v.first;
         if (!v.second && inList.contains(docObj)) {
             std::stringstream ss;
