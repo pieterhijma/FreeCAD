@@ -2714,7 +2714,7 @@ int Document::recompute(const std::vector<DocumentObject*>& objs,
                     signalRecomputedObject(*obj);
                     obj->purgeTouched();
                     // set all dependent object touched to force recompute
-                    for (auto inObjIt : obj->getInList()) {
+                    for (auto inObjIt : obj->getInListWithoutExposed()) {
                         inObjIt->enforceRecompute();
                     }
                 }
