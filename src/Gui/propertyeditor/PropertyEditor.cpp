@@ -793,6 +793,7 @@ enum MenuAction
     MA_AddProp,
     MA_EditPropTooltip,
     MA_EditPropGroup,
+    MA_Expose,
     MA_Transient,
     MA_Output,
     MA_NoRecompute,
@@ -996,6 +997,21 @@ void PropertyEditor::contextMenuEvent(QContextMenuEvent*)
     }
     if (canRemove) {
         menu.addAction(tr("Delete Property"))->setData(QVariant(MA_RemoveProp));
+    }
+
+    if (!props.empty()) {
+        bool allExposed = std::ranges::all_of(props, [&](auto prop) {
+            return prop->testStatus(App::Property::Exposed);
+        });
+        bool allUnexposed = std::ranges::all_of(props, [&](auto prop) {
+            return !prop->testStatus(App::Property::Exposed);
+        });
+        if (allExposed) {
+            menu.addAction(tr("Unexpose property"))->setData(QVariant(MA_Expose));
+        }
+        else if (allUnexposed) {
+            menu.addAction(tr("Expose property"))->setData(QVariant(MA_Expose));
+        }
     }
 
     // add a separator between adding/removing properties and the rest
@@ -1227,6 +1243,12 @@ void PropertyEditor::contextMenuEvent(QContextMenuEvent*)
         case MA_RemoveProp: {
             removeProperties(props);
             break;
+        }
+        case MA_Expose: {
+            for (auto prop : props) {
+                bool exposed = prop->testStatus(App::Property::Exposed);
+                prop->setStatus(App::Property::Exposed, !exposed);
+            }
         }
         default:
             break;
