@@ -615,9 +615,6 @@ private:
     // Sync status with Property_Type
     void syncType(unsigned type);
 
-    Property* createPropertyContext(const char* name,
-                                    DocumentObject* obj, DocumentObject* objContext) const;
-
 private:
     PropertyContainer* father {nullptr};
     const char* myName {nullptr};
