@@ -1102,7 +1102,13 @@ public:
 
     const std::vector<DocumentObject*>& getValues() const
     {
-        return _lValueList;
+        try {
+            return getFromContext<PropertyLinkSubList, const std::vector<DocumentObject*>&>
+                (&PropertyLinkSubList::getValues);
+        }
+        catch (const NoContextException& e) {
+            return _lValueList;
+        }
     }
 
     const std::string getPyReprString() const;
@@ -1117,7 +1123,15 @@ public:
 
     const std::vector<std::string>& getSubValues() const
     {
-        return _lSubList;
+        try {
+            using FuncType = const std::vector<std::string>& (PropertyLinkSubList::*)() const;
+            return getFromContext<PropertyLinkSubList,
+                                  const std::vector<std::string>&, FuncType>
+                (&PropertyLinkSubList::getSubValues);
+        }
+        catch (const NoContextException& e) {
+            return _lSubList;
+        }
     }
 
     std::vector<std::string> getSubValues(bool newStyle) const;
