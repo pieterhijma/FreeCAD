@@ -2096,6 +2096,7 @@ void Application::initTypes()
     App::LinkExtensionPython           ::init();
     App::SuppressibleExtension         ::init();
     App::SuppressibleExtensionPython   ::init();
+    App::VariantExtension              ::init();
 
     // Document classes
     App::TransactionalObject       ::init();
@@ -2141,7 +2142,6 @@ void Application::initTypes()
     App::LinkElementPython         ::init();
     App::LinkGroup                 ::init();
     App::LinkGroupPython           ::init();
-    App::VariantExtension          ::init();
     App::VarSet                    ::init();
 
     // Expression classes

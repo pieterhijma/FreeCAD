@@ -294,6 +294,8 @@
         <file>user-input/mouse-scroll.svg</file>
         <file>user.svg</file>
         <file>utilities-terminal.svg</file>
+        <file>Variant.svg</file>
+        <file>VariantOverlay.svg</file>
         <file>VarSet.svg</file>
         <file>vertex-selection.svg</file>
         <file>view-axonometric.svg</file>
