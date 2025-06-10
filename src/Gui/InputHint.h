@@ -229,6 +229,62 @@ struct InputHint
     std::list<InputSequence> sequences;
 };
 
+template<typename T>
+struct HintsForState;
+
+template <typename T>
+using HintTable = std::list<HintsForState<T>>;
+
+template <typename T>
+struct HintsForState
+{
+    T state;
+    std::variant<std::list<InputHint>, HintTable<T>> table;
+};
+
+template <typename T>
+std::list<InputHint> lookupHints(const std::list<T>& state, const HintTable<T>& table)
+{
+    return lookup(state.begin(), state.end(), table);
+}
+
+template <typename T>
+std::list<InputHint> lookup(
+    typename std::list<T>::const_iterator it,
+    typename std::list<T>::const_iterator end,
+    const HintTable<T>& table)
+{
+    auto entryIt = std::find_if(table.begin(), table.end(), [&](const auto& entry) {
+        return it != end && entry.state == *it;
+    });
+
+    if (entryIt == table.end()) {
+        return {};
+    }
+
+    const auto& entry = *entryIt;
+
+    if (std::holds_alternative<std::list<InputHint>>(entry.table)) {
+        if (std::next(it) != end) {
+            // misformed table, final state should result in hints
+            return {};
+        }
+        return std::get<std::list<InputHint>>(entry.table);
+    }
+
+    if (std::holds_alternative<std::list<HintsForState<T>>>(entry.table)) {
+        const auto& subTable = std::get<std::list<HintsForState<T>>>(entry.table);
+        auto next = std::next(it);
+        if (next == end) {
+            // misformed table, final state should result in hints
+            return {};
+        }
+        return lookup(next, end, subTable);
+    }
+
+    return {};
+}
+
 }  // namespace Gui
 
 #endif // GUI_INPUTHINT_H
