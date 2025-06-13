@@ -229,6 +229,61 @@ struct InputHint
     std::list<InputSequence> sequences;
 };
 
+template <typename Tuple, std::size_t Index>
+struct HintsForState;
+
+template <typename Tuple, std::size_t Index>
+using HintTable = std::list<HintsForState<Tuple, Index>>;
+
+// Helper to get the type of an element in a tuple by index
+template <std::size_t Index, typename Tuple>
+using TupleElement = typename std::tuple_element<Index, Tuple>::type;
+
+template <typename Tuple, std::size_t Index>
+struct HintsForState {
+    static_assert(Index < std::tuple_size_v<Tuple>, "Index exceeds tuple size");
+
+    using CurrentType = TupleElement<Index, Tuple>;
+
+    // The table is either the next type in the tuple or a list of InputHint
+    using TableType = std::conditional_t<Index + 1 < std::tuple_size_v<Tuple>,
+                                                     HintTable<Tuple, Index + 1>,
+                                                     std::list<InputHint>>;
+
+    CurrentType state;
+    TableType table;
+};
+
+template <typename Tuple, std::size_t Index>
+std::list<InputHint> lookup(const HintTable<Tuple, Index>& table, const Tuple& states) {
+    // Base case
+    if constexpr (Index >= std::tuple_size_v<Tuple>) {
+        return {};
+    }
+
+    // Recurse
+    const auto& currentState = std::get<Index>(states);
+    for (const auto& entry : table) {
+        if (entry.state == currentState) {
+            // The table is a leaf (list of InputHint)
+            if constexpr (Index + 1 == std::tuple_size_v<Tuple>) {
+                return entry.table;
+            }
+
+            // The table is a hint table for the next state
+            if constexpr (Index + 1 < std::tuple_size_v<Tuple>) {
+                return lookup<Tuple, Index + 1>(entry.table, states);
+            }
+        }
+    }
+    return {};
+}
+
+template <typename Tuple>
+std::list<InputHint> lookupHints(const Tuple& states, const HintTable<Tuple, 0>& table) {
+    return lookup<Tuple, 0>(table, states);
+}
+
 }  // namespace Gui
 
 #endif // GUI_INPUTHINT_H
