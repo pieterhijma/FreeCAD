@@ -108,7 +108,7 @@ private:
                     {.state = ConstructionMethod::Center,
                      .table = Gui::HintTable<States, 1>{
                          {.state = SelectMode::SeekFirst,
-                          .table = [&switchHint]{
+                          .table = [&switchHint]() {
                               std::list<Gui::InputHint> hints;
                               if (randomInt() % 2 == 0) {
                                   int x = randomInt() % 100;
@@ -123,7 +123,7 @@ private:
                               }
                               hints.push_back(switchHint);
                               return hints;
-                          }()
+                          }
                          },
                          {.state = SelectMode::SeekSecond,
                           .table = std::list<Gui::InputHint>{

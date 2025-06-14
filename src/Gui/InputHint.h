@@ -235,9 +235,10 @@ public:
     // Implicit conversion is intentional here.
     // NOLINTNEXTLINE(google-explicit-constructor)
     Provider(T value) : provider([value]() { return value; }) {}
-    // NOLINTNEXTLINE(google-explicit-constructor)
-    Provider(std::function<T()> provider) : provider(provider) {}
-
+    template <typename Callable>
+    // NOLINTNEXTLINE(google-explicit-constructor,bugprone-forwarding-reference-overload)
+    Provider(Callable&& callable)
+        : provider(std::forward<Callable>(callable)) {}
     T get() const { return provider(); }
 private:
     std::function<T()> provider;
