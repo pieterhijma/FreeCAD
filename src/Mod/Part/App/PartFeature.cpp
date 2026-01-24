@@ -58,7 +58,7 @@
 #include <TopExp_Explorer.hxx>
 #include <TopoDS.hxx>
 #include <TopTools_IndexedMapOfShape.hxx>
-#include <TopTools_ListIteratorOfListOfShape.hxx>
+#include <TopTools_ListOfShape.hxx>
 
 
 #include <App/Application.h>
@@ -484,7 +484,7 @@ App::DocumentObject* Feature::getSubObject(
         Standard_CString msg = e.GetMessageString();
 
         // Avoid name mangling
-        str << e.DynamicType()->get_type_name() << " ";
+        str << e.ExceptionType() << " ";
 
         if (msg) {
             str << msg;
