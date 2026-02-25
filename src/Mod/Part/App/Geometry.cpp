@@ -43,6 +43,7 @@
 #include <GCE2d_MakeSegment.hxx>
 #include <GCPnts_AbscissaPoint.hxx>
 #include <TColStd_Array1OfInteger.hxx>
+#include <TColgp_Array1OfPnt2d.hxx>
 #include <TColgp_Array1OfVec.hxx>
 #include <gce_ErrorType.hxx>
 #include <gce_MakeParab.hxx>
