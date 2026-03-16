@@ -42,6 +42,7 @@
 #include <BRepBuilderAPI_MakeVertex.hxx>
 #include <BRepBuilderAPI.hxx>
 #include <BRepExtrema_DistShapeShape.hxx>
+#include <TopExp_Explorer.hxx>
 #include <TopoDS.hxx>
 #include <gp_Pln.hxx>
 

@@ -33,6 +33,7 @@
 #include <TopExp.hxx>
 #include <TopoDS.hxx>
 #include <gp_Pnt.hxx>
+#include <TopTools_IndexedMapOfShape.hxx>
 
 #include <QEventLoop>
 #include <QFuture>

@@ -845,7 +845,7 @@ GProp_GProps AttachEngine::getInertialPropsOfShape(const std::vector<const TopoS
     const TopoDS_Shape& sh0 = totalSeq.Value(1);
     switch (sh0.ShapeType()) {
         case TopAbs_VERTEX: {
-            GProp_PGProps gpr;
+            GProp_GProps gpr;
             for (int i = 0; i < totalSeq.Length(); i++) {
                 const TopoDS_Shape& sh = totalSeq.Value(i + 1);
                 if (sh.ShapeType() != TopAbs_VERTEX) {
@@ -854,7 +854,7 @@ GProp_GProps AttachEngine::getInertialPropsOfShape(const std::vector<const TopoS
                         "(not only vertices)"
                     );
                 }
-                gpr.AddPoint(BRep_Tool::Pnt(TopoDS::Vertex(sh)));
+                gpr.Add(BRep_Tool::Pnt(TopoDS::Vertex(sh)));
             }
             return gpr;
         } break;

@@ -189,6 +189,10 @@
 using GeomAdaptor_HCurve = GeomAdaptor_Curve;
 #endif
 
+#if OCC_VERSION_HEX >= 0x080000
+typedef NCollection_Array1<gp_Pnt2d> TColgp_Array1OfPnt2d;
+#endif
+
 using namespace Part;
 
 

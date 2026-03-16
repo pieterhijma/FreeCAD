@@ -168,7 +168,6 @@
 #include <BRepGProp_Face.hxx>
 #include <BRepIntCurveSurface_Inter.hxx>
 #include <BRepLProp_CLProps.hxx>
-#include <BRepLProp_CurveTool.hxx>
 #include <BRepLProp_SLProps.hxx>
 #include <BRepLib.hxx>
 #include <BRepLib_FindSurface.hxx>
@@ -292,7 +291,7 @@
 #include <Geom2dConvert_ApproxCurve.hxx>
 #include <Geom2dConvert_BSplineCurveToBezierCurve.hxx>
 #include <Geom2dConvert_CompCurveToBSplineCurve.hxx>
-#include <Geom2dLProp_CLProps2d.hxx>
+#include <GeomLProp_CLProps.hxx>
 #include <GeomAdaptor_Curve.hxx>
 #include <GeomAbs_CurveType.hxx>
 #include <GeomAdaptor.hxx>

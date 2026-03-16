@@ -44,7 +44,7 @@
 #include <Geom2dAPI_InterCurveCurve.hxx>
 #include <Geom2dAPI_ProjectPointOnCurve.hxx>
 #include <Geom2dConvert_ApproxCurve.hxx>
-#include <Geom2dLProp_CLProps2d.hxx>
+#include <GeomLProp_CLProps.hxx>
 #include <gp_Dir2d.hxx>
 #include <Precision.hxx>
 #include <ShapeConstruct_Curve.hxx>
@@ -593,7 +593,7 @@ PyObject* Curve2dPy::tangent(PyObject* args)
                 return nullptr;
             }
             gp_Dir2d dir;
-            Geom2dLProp_CLProps2d prop(c, u, 2, Precision::Confusion());
+            GeomLProp_CLProps2d prop(c, u, 2, Precision::Confusion());
             if (prop.IsTangentDefined()) {
                 prop.Tangent(dir);
             }
@@ -621,7 +621,7 @@ PyObject* Curve2dPy::normal(PyObject* args) const
                 return nullptr;
             }
             gp_Dir2d dir;
-            Geom2dLProp_CLProps2d prop(c, u, 2, Precision::Confusion());
+            GeomLProp_CLProps2d prop(c, u, 2, Precision::Confusion());
             prop.Normal(dir);
 
             return Py::new_reference_to(Base::Vector2dPy::create(dir.X(), dir.Y()));
@@ -646,7 +646,7 @@ PyObject* Curve2dPy::curvature(PyObject* args) const
             if (!PyArg_ParseTuple(args, "d", &u)) {
                 return nullptr;
             }
-            Geom2dLProp_CLProps2d prop(c, u, 2, Precision::Confusion());
+            GeomLProp_CLProps2d prop(c, u, 2, Precision::Confusion());
             double C = prop.Curvature();
             return Py::new_reference_to(Py::Float(C));
         }
@@ -670,7 +670,7 @@ PyObject* Curve2dPy::centerOfCurvature(PyObject* args) const
             if (!PyArg_ParseTuple(args, "d", &u)) {
                 return nullptr;
             }
-            Geom2dLProp_CLProps2d prop(c, u, 2, Precision::Confusion());
+            GeomLProp_CLProps2d prop(c, u, 2, Precision::Confusion());
             gp_Pnt2d pnt;
             prop.CentreOfCurvature(pnt);
 
