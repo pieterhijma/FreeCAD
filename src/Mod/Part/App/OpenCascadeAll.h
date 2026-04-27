@@ -69,13 +69,11 @@
 #include <Standard_OutOfRange.hxx>
 #include <Standard_Overflow.hxx>
 #include <Standard_Persistent.hxx>
-#include <Standard_PrimitiveTypes.hxx>
 #include <Standard_ProgramError.hxx>
 #include <Standard_RangeError.hxx>
 #include <Standard_Real.hxx>
 #include <Standard_ShortReal.hxx>
 #include <Standard_SStream.hxx>
-#include <Standard_Stream.hxx>
 #include <Standard_Transient.hxx>
 #include <Standard_Type.hxx>
 #include <Standard_TypeDef.hxx>
@@ -147,7 +145,6 @@
 #include <BRepBuilderAPI_Transform.hxx>
 
 #include <BRepCheck_Analyzer.hxx>
-#include <BRepCheck_ListIteratorOfListOfStatus.hxx>
 #include <BRepCheck_Result.hxx>
 #include <BRepCheck_Solid.hxx>
 #include <BRepClass_FaceClassifier.hxx>
@@ -476,7 +473,6 @@
 #include <TColStd_Array2OfReal.hxx>
 #include <TColStd_HArray1OfBoolean.hxx>
 #include <TColStd_HSequenceOfTransient.hxx>
-#include <TColStd_MapIteratorOfMapOfTransient.hxx>
 #include <TColStd_MapOfTransient.hxx>
 #include <TColStd_SequenceOfExtendedString.hxx>
 
@@ -496,15 +492,11 @@
 #include <TopExp.hxx>
 #include <TopExp_Explorer.hxx>
 #include <TopLoc_Location.hxx>
-#include <TopTools_DataMapIteratorOfDataMapOfShapeShape.hxx>
-#include <TopTools_DataMapIteratorOfDataMapOfIntegerListOfShape.hxx>
 #include <TopTools_DataMapOfIntegerListOfShape.hxx>
 #include <TopTools_DataMapOfIntegerShape.hxx>
 #include <TopTools_HSequenceOfShape.hxx>
 #include <TopTools_IndexedDataMapOfShapeListOfShape.hxx>
 #include <TopTools_IndexedMapOfShape.hxx>
-#include <TopTools_ListIteratorOfListOfShape.hxx>
-#include <TopTools_ListIteratorOfListOfShape.hxx>
 #include <TopTools_ListOfShape.hxx>
 #include <TopTools_MapOfShape.hxx>
 
