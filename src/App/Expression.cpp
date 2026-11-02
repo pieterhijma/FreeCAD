@@ -3809,11 +3809,26 @@ bool expressionStartsAt(
         && input.substr(position, value.size()) == value;
 }
 
-bool isExpressionIdentifierContinuation(const UChar32 codePoint)
+bool isExpressionUnitPunctuation(const UChar32 codePoint)
 {
-    // Keep this policy aligned with the IDENTIFIER and CELLADDRESS rules in Expression.l.
+    switch (codePoint) {
+        case '\'':
+        case '"':
+        case U'\u00B0': // degree °
+        case U'\u2032': // prime ′
+        case U'\u2033': // double prime ″
+            return true;
+        default:
+            return false;
+    }
+}
+
+bool isExpressionTokenContinuation(const UChar32 codePoint)
+{
+    // Keep this policy aligned with the IDENTIFIER, CELLADDRESS, and UNIT rules in Expression.l.
     // Localized numeric normalization must never split a token accepted by the canonical lexer.
-    if (codePoint == '_' || codePoint == '@' || codePoint == '$') {
+    if (codePoint == '_' || codePoint == '@' || codePoint == '$'
+        || isExpressionUnitPunctuation(codePoint)) {
         return true;
     }
 
@@ -3835,17 +3850,74 @@ bool isExpressionIdentifierContinuation(const UChar32 codePoint)
     }
 }
 
-bool followsExpressionIdentifier(std::string_view input, const std::size_t position)
+bool localizedDigitEndsAt(
+    std::string_view input,
+    const std::size_t end,
+    const NumericLocaleContext& locale
+)
 {
+    constexpr std::size_t MaxNrBytes = 4; // Max bytes in a UTF-8 code point
+    const std::size_t limit = end > MaxNrBytes ? end - MaxNrBytes : 0;
+    for (std::size_t candidate = end; candidate > limit; --candidate) {
+        int digit = 0;
+        std::size_t digitLength = 0;
+        if (Base::localizedDigitAt(input, candidate - 1, locale, digit, digitLength)
+            && candidate - 1 + digitLength == end) {
+            return true;
+        }
+    }
+    return false;
+}
+
+// Decodes the code point ending at `position`; `start` receives its first byte offset.
+UChar32 previousCodePoint(std::string_view input, const std::size_t position, std::size_t& start)
+{
+    start = position;
     if (position == 0 || position > static_cast<std::size_t>(std::numeric_limits<int32_t>::max())) {
+        return U_SENTINEL;
+    }
+
+    auto index = static_cast<int32_t>(position);
+    UChar32 codePoint = U_SENTINEL;
+    const auto* bytes = reinterpret_cast<const uint8_t*>(input.data());
+    U8_PREV(bytes, 0, index, codePoint);
+    start = static_cast<std::size_t>(index);
+    return codePoint;
+}
+
+// Checks whether a unit punctuation character at the end of a range
+// terminates a localized numeric token. Whitespace between the number
+// and the unit punctuation is allowed.
+bool endsWithUnitPunctuationAfterLocalizedDigit(
+    std::string_view input,
+    const std::size_t end,
+    const NumericLocaleContext& locale
+)
+{
+    std::size_t unitStart = 0;
+    const UChar32 unit = previousCodePoint(input, end, unitStart);
+    if (!isExpressionUnitPunctuation(unit)) {
         return false;
     }
 
-    auto previous = static_cast<int32_t>(position);
-    UChar32 codePoint = U_SENTINEL;
-    const auto* bytes = reinterpret_cast<const uint8_t*>(input.data());
-    U8_PREV(bytes, 0, previous, codePoint);
-    return codePoint != U_SENTINEL && isExpressionIdentifierContinuation(codePoint);
+    std::size_t digitEnd = unitStart;
+    while (digitEnd > 0) {
+        std::size_t whitespaceStart = 0;
+        const UChar32 previous = previousCodePoint(input, digitEnd, whitespaceStart);
+        if (previous == U_SENTINEL || !u_isUWhiteSpace(previous)) {
+            break;
+        }
+        digitEnd = whitespaceStart;
+    }
+
+    return localizedDigitEndsAt(input, digitEnd, locale);
+}
+
+bool followsExpressionTokenContinuation(std::string_view input, const std::size_t position)
+{
+    std::size_t start = 0;
+    const UChar32 codePoint = previousCodePoint(input, position, start);
+    return codePoint != U_SENTINEL && isExpressionTokenContinuation(codePoint);
 }
 
 bool startsExpressionNumber(
@@ -3858,10 +3930,26 @@ bool startsExpressionNumber(
         return false;
     }
 
+    const std::string_view positiveSign {
+        locale.positiveSign.data(), locale.positiveSign.size()
+    };
+    const std::string_view negativeSign {locale.negativeSign.data(), locale.negativeSign.size()};
+    const auto signs = {std::string_view {"+"}, std::string_view {"-"}, positiveSign, negativeSign};
+    const auto isSignAt = [&](const std::size_t offset) {
+        return std::ranges::any_of(signs, [&](const auto sign) {
+            return expressionStartsAt(input, offset, sign);
+        });
+    };
+
     // Base scans numeric tokens; App decides where expression grammar allows one to start.
     // In particular, identifier and cell-reference suffixes remain opaque to localization.
-    if (followsExpressionIdentifier(input, position)) {
-        return false;
+    if (followsExpressionTokenContinuation(input, position) && !isSignAt(position)) {
+        // Unit punctuation can separate two numeric tokens, as in feet-and-inches
+        // notation: 1'2,500". Do not treat the number after the punctuation as
+        // an identifier or unit-token continuation.
+        if (!endsWithUnitPunctuationAfterLocalizedDigit(input, position, locale)) {
+            return false;
+        }
     }
 
     const auto digitAt = [&](const std::size_t offset) {
@@ -3882,14 +3970,7 @@ bool startsExpressionNumber(
         return digitAt(position + separatorLength);
     }
 
-    const std::string_view positiveSign {
-        locale.positiveSign.data(), locale.positiveSign.size()
-    };
-    const std::string_view negativeSign {
-        locale.negativeSign.data(), locale.negativeSign.size()
-    };
-    for (const auto sign : {std::string_view {"+"}, std::string_view {"-"}, positiveSign,
-                            negativeSign}) {
+    for (const auto sign : signs) {
         if (!expressionStartsAt(input, position, sign)) {
             continue;
         }
@@ -3907,16 +3988,18 @@ bool startsExpressionNumber(
                 || preceding == ']') {
                 return false;
             }
+
+            // Unit punctuation can also terminate a numeric token.
+            // Allow whitespace between the number and its unit marker.
+            if (endsWithUnitPunctuationAfterLocalizedDigit(input, previous, locale)) {
+                return false;
+            }
+
             // A UTF-8 localized digit may end with a non-ASCII continuation byte, which is not
             // recognized by std::isalnum. Check the complete code point before treating a sign
             // as unary so compact localized expressions keep their binary operator semantics.
-            for (std::size_t candidate = previous; candidate > 0; --candidate) {
-                int digit = 0;
-                std::size_t digitLength = 0;
-                if (Base::localizedDigitAt(input, candidate - 1, locale, digit, digitLength)
-                    && candidate - 1 + digitLength == previous) {
-                    return false;
-                }
+            if (localizedDigitEndsAt(input, previous, locale)) {
+                return false;
             }
         }
 
